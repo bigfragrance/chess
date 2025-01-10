@@ -17,8 +17,8 @@ public class Screen extends JPanel implements Runnable{
     public volatile double camX=0;
     public volatile double camY=0;
     public volatile double zoom=40;
-    public int windowWidth=900;
-    public int windowHeight=900;
+    public int windowWidth=1000;
+    public int windowHeight=1000;
     public static int mouseX = 50;
     public static int mouseY = 50;
     public static volatile Vec2d mousePos=new Vec2d(50,50);
