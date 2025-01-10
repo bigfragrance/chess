@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) {
         //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
         // to see how IntelliJ IDEA suggests fixing it.
-        Screen.frame = new JFrame("florr");
+        Screen.frame = new JFrame("lol");
         Screen panel = new Screen();
         panel.setBackground(new Color(50,200,20));
         Screen.frame.add(panel);
