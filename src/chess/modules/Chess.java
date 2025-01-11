@@ -14,6 +14,7 @@ public class Chess {
     public BlockPos2d blockPos;
     public Vec2d pos;
     public Box boundingBox;
+    public double moreInfo;
     public Chess(int team,BlockPos2d blockPos){
         this.team=team;
         this.blockPos=blockPos;

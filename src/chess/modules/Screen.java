@@ -69,10 +69,8 @@ public class Screen extends JPanel implements Runnable{
             @Override
             public void mousePressed(MouseEvent e) {
                 if(cs.tempChess!=null) {
-                    Chess c=new Chess(cs.nowTeam, cs.tempChess.blockPos);
-                    cs.chesses.add(c);
-                    cs.put(cs.tempChess.blockPos,c);
-                    cs.nowTeam = (cs.nowTeam + 1) % 2;
+                    Chess c=new Chess(cs.nowTeam.get(), cs.tempChess.blockPos);
+                    cs.placeChess(c);
                 }
             }
 

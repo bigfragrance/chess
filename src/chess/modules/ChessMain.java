@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChessMain implements Runnable{
     public static volatile ChessMain cs;
@@ -15,7 +16,7 @@ public class ChessMain implements Runnable{
     public volatile ArrayList<Chess> checkedAlive=new ArrayList<>();
     public volatile ArrayList<Chess> checkedDead=new ArrayList<>();
     public volatile HashMap<Integer,HashMap<Integer,Chess>> map=new HashMap<>();
-    public int nowTeam=0;
+    public volatile AtomicInteger nowTeam=new AtomicInteger(0);
     public int sizeX=4;
     public int sizeY=4;
     public static volatile PeopleComputer pc=new PeopleComputer();
@@ -53,7 +54,7 @@ public class ChessMain implements Runnable{
         }
     }
     public void update(){
-        tempChess=new Chess(nowTeam+2,Screen.mousePos.switchToGame());
+        tempChess=new Chess(nowTeam.get()+2,Screen.mousePos.switchToGame());
         for(Chess chess:chesses){
             if(chess.blockPos.equals(tempChess.blockPos)){
                 tempChess=null;
@@ -64,7 +65,7 @@ public class ChessMain implements Runnable{
             tempChess=null;
         }
         updateEaten();
-        if(nowTeam==1){
+        if(nowTeam.get()==1){
             runPc();
         }
         //updateEaten();
@@ -91,18 +92,18 @@ public class ChessMain implements Runnable{
         checkedAlive=new ArrayList<>();
         checkedDead=new ArrayList<>();
         for(Chess chess:chesses){
-            if(chess.team!=nowTeam)continue;
+            if(chess.team!=nowTeam.get())continue;
             if(checkedAlive.contains(chess)||checkedDead.contains(chess))continue;
-            if(!haveAir(chess,nowTeam,new ArrayList<>())) {
+            if(!haveAir(chess,nowTeam.get(),new ArrayList<>())) {
                 checkedDead.add(chess);
             }
         }
         for(Chess chess:checkedDead){
             chesses.remove(chess);
             put(chess.blockPos,new Chess(-1,chess.blockPos));
-            res[nowTeam]++;
+            res[nowTeam.get()]++;
         }
-        int t=(nowTeam+1)%2;
+        int t=(nowTeam.get()+1)%2;
         checkedAlive=new ArrayList<>();
         checkedDead=new ArrayList<>();
         for(Chess chess:chesses){
@@ -164,5 +165,10 @@ public class ChessMain implements Runnable{
         HashMap<Integer,Chess> m=map.get(pos.x);
         if(m==null) return null;
         return m.get(pos.y);
+    }
+    public void placeChess(Chess chess){
+        chesses.add(chess);
+        put(chess.blockPos,chess);
+        nowTeam.set((chess.team + 1) % 2) ;
     }
 }
