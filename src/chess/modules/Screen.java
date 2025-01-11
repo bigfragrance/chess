@@ -33,7 +33,7 @@ public class Screen extends JPanel implements Runnable{
             }
 
         });
-        addKeyListener(new KeyListener() {
+        /*addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
                 System.out.println("Key Typed: " + e.getKeyChar());
@@ -60,7 +60,7 @@ public class Screen extends JPanel implements Runnable{
             public void keyReleased(KeyEvent e) {
 
             }
-        });
+        });*/
         addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e){
@@ -73,7 +73,6 @@ public class Screen extends JPanel implements Runnable{
                     cs.chesses.add(c);
                     cs.put(cs.tempChess.blockPos,c);
                     cs.nowTeam = (cs.nowTeam + 1) % 2;
-                    cs.updateEaten();
                 }
             }
 
@@ -93,19 +92,7 @@ public class Screen extends JPanel implements Runnable{
             }
         });
 
-        addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-                System.out.println("Key Typed: " + e.getKeyChar());
-                super.keyTyped(e);
-                if(e.getKeyChar()=='o'){
-                    zoom+=10;
-                }
-                if(e.getKeyChar()=='p'){
-                    zoom-=10;
-                }
-            }
-        });
+        addKeyListener(new MyAdapter());
         addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
@@ -116,6 +103,19 @@ public class Screen extends JPanel implements Runnable{
                 }
             }
         });
+    }
+    public class MyAdapter extends KeyAdapter{
+        @Override
+        public void keyTyped(KeyEvent e) {
+            System.out.println("Key Typed: " + e.getKeyChar());
+            super.keyTyped(e);
+            if(e.getKeyChar()=='o'){
+                zoom+=10;
+            }
+            if(e.getKeyChar()=='p'){
+                zoom-=10;
+            }
+        }
     }
     public void run(){
         while (true) {

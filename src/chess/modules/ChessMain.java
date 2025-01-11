@@ -1,6 +1,7 @@
 package chess.modules;
 
 import chess.math.BlockPos2d;
+import chess.modules.ai.PeopleComputer;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -15,14 +16,21 @@ public class ChessMain implements Runnable{
     public volatile ArrayList<Chess> checkedDead=new ArrayList<>();
     public volatile HashMap<Integer,HashMap<Integer,Chess>> map=new HashMap<>();
     public int nowTeam=0;
-    public int sizeX=20;
-    public int sizeY=20;
+    public int sizeX=4;
+    public int sizeY=4;
+    public static volatile PeopleComputer pc=new PeopleComputer();
+    public static Thread thread;
     public ChessMain(){
         cs=this;
     }
 
     @Override
     public void run() {
+        for(int x=-sizeX-1;x<=sizeX+1;x++){
+            for(int y=-sizeY-1;y<=sizeY+1;y++){
+                put(new BlockPos2d(x,y),new Chess(2,new BlockPos2d(x,y)));
+            }
+        }
         for(int x=-sizeX;x<=sizeX;x++){
             for(int y=-sizeY;y<=sizeY;y++){
                 put(new BlockPos2d(x,y),new Chess(-1,new BlockPos2d(x,y)));
@@ -55,21 +63,44 @@ public class ChessMain implements Runnable{
         if(tempChess==null||tempChess.blockPos.x<-sizeX||tempChess.blockPos.x>sizeX||tempChess.blockPos.y<-sizeY||tempChess.blockPos.y>sizeY){
             tempChess=null;
         }
+        updateEaten();
+        if(nowTeam==1){
+            runPc();
+        }
         //updateEaten();
         //System.out.printf(String.valueOf(Screen.mousePos.switchToGame().x)+"\n");
     }
+    public void runPc(){
+        if(thread==null||!thread.isAlive()) {
+            thread = new Thread(()->{
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                pc.think();
+            });
+            thread.start();
+        }
+    }
     public static List<BlockPos2d> checkDirection=List.of(new BlockPos2d(0,1),new BlockPos2d(0,-1),new BlockPos2d(1,0),new BlockPos2d(-1,0));
-    public void updateEaten(){
+    public int[] updateEaten(){
+
+        //long start=System.currentTimeMillis();
+        int[] res=new int[2];
         checkedAlive=new ArrayList<>();
         checkedDead=new ArrayList<>();
         for(Chess chess:chesses){
             if(chess.team!=nowTeam)continue;
             if(checkedAlive.contains(chess)||checkedDead.contains(chess))continue;
-            haveAir(chess,nowTeam,new ArrayList<>());
+            if(!haveAir(chess,nowTeam,new ArrayList<>())) {
+                checkedDead.add(chess);
+            }
         }
         for(Chess chess:checkedDead){
             chesses.remove(chess);
             put(chess.blockPos,new Chess(-1,chess.blockPos));
+            res[nowTeam]++;
         }
         int t=(nowTeam+1)%2;
         checkedAlive=new ArrayList<>();
@@ -77,12 +108,17 @@ public class ChessMain implements Runnable{
         for(Chess chess:chesses){
             if(chess.team!=t)continue;
             if(checkedAlive.contains(chess)||checkedDead.contains(chess))continue;
-            haveAir(chess,t,new ArrayList<>());
+            if(!haveAir(chess,t,new ArrayList<>())) {
+                checkedDead.add(chess);
+            }
         }
         for(Chess chess:checkedDead){
             chesses.remove(chess);
             put(chess.blockPos,new Chess(-1,chess.blockPos));
+            res[t]++;
         }
+        return res;
+        //System.out.println("updateEaten: "+(System.currentTimeMillis() - start));
     }
     public boolean haveAir(Chess chess,int team,List<Chess> checked){
         for(BlockPos2d off:checkDirection) {
@@ -109,8 +145,8 @@ public class ChessMain implements Runnable{
                 }
             }
         }
-        checkedDead.add(chess);
-        checkedDead.addAll(checked);
+        //checkedDead.add(chess);
+        //checkedDead.addAll(checked);
         return false;
     }
     public void put(BlockPos2d pos,Chess c){
